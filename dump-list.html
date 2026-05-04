@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Dump List â Incumbent Dump</title>
+<meta name="description" content="A starter list of long-serving federal incumbents, balanced across parties. Sortable by state, chamber, and party." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="brand">Incumbent<span class="accent">Dump</span></a>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="dump-list.html">The List</a></li>
+      <li><a href="share.html">Share</a></li>
+      <li><a href="blog/index.html">Blog</a></li>
+      <li><a href="contact.html">Sign Up</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <h1>The Dump List.</h1>
+    <p class="lede">
+      Long-serving federal incumbents, balanced across parties. The point isn't who's worse â it's that all of them have been in office long enough that letting them stay is a vote against turnover itself.
+    </p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="filters">
+      <div>
+        <label for="f-state">State</label>
+        <select id="f-state"><option value="">All</option></select>
+      </div>
+      <div>
+        <label for="f-chamber">Chamber</label>
+        <select id="f-chamber">
+          <option value="">All</option>
+          <option value="Senate">Senate</option>
+          <option value="House">House</option>
+        </select>
+      </div>
+      <div>
+        <label for="f-party">Party</label>
+        <select id="f-party">
+          <option value="">All</option>
+          <option value="D">Democrat</option>
+          <option value="R">Republican</option>
+          <option value="I">Independent</option>
+        </select>
+      </div>
+      <div style="flex:1; min-width:180px;">
+        <label for="f-search">Search</label>
+        <input id="f-search" type="search" placeholder="Nameâ¦" style="width:100%;" />
+      </div>
+    </div>
+
+    <p id="count" class="muted" style="font-size:0.9rem;"></p>
+
+    <div id="grid" class="member-grid"></div>
+    <p id="empty" class="muted center hidden" style="margin-top:30px;">No matches.</p>
+  </div>
+</section>
+
+<footer>
+  <p>Data is a starter set, not a complete roster. <a href="contact.html">Suggest additions or corrections.</a></p>
+</footer>
+
+<script>
+(function () {
+  const grid = document.getElementById('grid');
+  const stateSel = document.getElementById('f-state');
+  const chamberSel = document.getElementById('f-chamber');
+  const partySel = document.getElementById('f-party');
+  const searchEl = document.getElementById('f-search');
+  const countEl = document.getElementById('count');
+  const emptyEl = document.getElementById('empty');
+
+  let members = [];
+
+  function partyName(p) { return p === 'D' ? 'Democrat' : p === 'R' ? 'Republican' : 'Independent'; }
+
+  function render() {
+    const st = stateSel.value;
+    const ch = chamberSel.value;
+    const pa = partySel.value;
+    const q = (searchEl.value || '').trim().toLowerCase();
+
+    const filtered = members.filter(m =>
+      (!st || m.state === st) &&
+      (!ch || m.chamber === ch) &&
+      (!pa || m.party === pa) &&
+      (!q || m.name.toLowerCase().includes(q))
+    );
+
+    countEl.textContent = filtered.length + ' of ' + members.length + ' shown';
+    emptyEl.classList.toggle('hidden', filtered.length !== 0);
+
+    grid.innerHTML = filtered.map(m => {
+      const pct = Math.min(100, Math.round((m.yearsInOffice / 50) * 100));
+      return `
+        <article class="member party-${m.party}">
+          <span class="dump-badge">DUMP</span>
+          <h3>${m.name}</h3>
+          <div class="role">${m.chamber} Â· ${m.state} Â· ${partyName(m.party)}</div>
+          <div class="years-bar"><div class="fill" style="width:${pct}%;"></div></div>
+          <div class="years-text">${m.yearsInOffice} years in office Â· since ${m.yearFirstElected}</div>
+        </article>
+      `;
+    }).join('');
+  }
+
+  fetch('starter-data/congress.json')
+    .then(r => r.json())
+    .then(data => {
+      members = data.members || [];
+      const states = [...new Set(members.map(m => m.state))].sort();
+      states.forEach(s => {
+        const o = document.createElement('option');
+        o.value = s; o.textContent = s;
+        stateSel.appendChild(o);
+      });
+      render();
+    })
+    .catch(err => {
+      grid.innerHTML = '<p class="muted">Failed to load list. Run a local server (python3 -m http.server 8000) â fetch() needs http, not file://</p>';
+      console.error(err);
+    });
+
+  [stateSel, chamberSel, partySel, searchEl].forEach(el => {
+    el.addEventListener('input', render);
+    el.addEventListener('change', render);
+  });
+})();
+</script>
+
+</body>
+</html>
