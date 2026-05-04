@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Share Kit â Incumbent Dump</title>
+<meta name="description" content="Five ready-to-post messages, all under 280 characters. Copy, post to X or Facebook." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="brand">Incumbent<span class="accent">Dump</span></a>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="dump-list.html">The List</a></li>
+      <li><a href="share.html">Share</a></li>
+      <li><a href="blog/index.html">Blog</a></li>
+      <li><a href="contact.html">Sign Up</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <h1>The share kit.</h1>
+    <p class="lede">Five posts. None partisan. All under 280 characters. Copy, post, repeat.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="posts" id="posts"></div>
+  </div>
+</section>
+
+<footer>
+  <p>Tag posts with <strong>#IncumbentDump</strong> if it helps. Or don't. The point is the vote, not the hashtag.</p>
+</footer>
+
+<script>
+const posts = [
+  "Both parties have a 95% incumbent re-election rate and a 14% approval rating. The math says we like the people we keep electing. The math is wrong. Vote them all out â left, right, doesn't matter. #IncumbentDump",
+  "If you think your representative is one of the good ones, the system thanks you. That sentence has run Congress for 40 years. Stop saying it. Vote against your incumbent. Either party. Every cycle.",
+  "We're not asking you to switch sides. We're asking you to stop sending the same people back. The party can keep the seat. The person can't.",
+  "The people writing the rules for the next 50 years should expect to be alive for them. Vote out anyone who's been in office longer than the youngest voter has been alive.",
+  "Politicians are afraid of exactly one thing: losing. They are not afraid of donations, op-eds, polls, or your hashtag. They are afraid of losing. Make them afraid. Vote out your incumbent."
+];
+
+const wrap = document.getElementById('posts');
+posts.forEach((text, i) => {
+  const el = document.createElement('div');
+  el.className = 'post';
+  const enc = encodeURIComponent(text);
+  el.innerHTML = `
+    <pre>${text}</pre>
+    <div class="actions">
+      <button class="btn small" data-copy="${i}">Copy</button>
+      <a class="btn small dark" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=${enc}">Post on X</a>
+      <a class="btn small ghost dark" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fincumbentdump.org&quote=${enc}">Share on Facebook</a>
+    </div>
+  `;
+  wrap.appendChild(el);
+});
+
+wrap.addEventListener('click', e => {
+  const btn = e.target.closest('button[data-copy]');
+  if (!btn) return;
+  const i = +btn.getAttribute('data-copy');
+  navigator.clipboard.writeText(posts[i]).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = orig, 1400);
+  }).catch(() => alert('Could not copy. Select text manually.'));
+});
+</script>
+
+</body>
+</html>
